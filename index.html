@@ -1,0 +1,99 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+
+export default function FinanceManager() {
+  const [transactions, setTransactions] = useState([]);
+  const [amount, setAmount] = useState("");
+  const [desc, setDesc] = useState("");
+  const [type, setType] = useState("income");
+
+  const addTransaction = () => {
+    if (!amount || isNaN(amount)) return;
+    const newTx = {
+      id: Date.now(),
+      desc,
+      amount: parseFloat(amount),
+      type,
+    };
+    setTransactions([newTx, ...transactions]);
+    setAmount("");
+    setDesc("");
+  };
+
+  const balance = transactions.reduce(
+    (acc, tx) => acc + (tx.type === "income" ? tx.amount : -tx.amount),
+    0
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6 flex flex-col items-center">
+      <motion.h1
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="text-3xl font-bold mb-6"
+      >
+        Finance Manager
+      </motion.h1>
+
+      <Card className="w-full max-w-md mb-6 shadow-xl">
+        <CardContent className="p-4">
+          <p className="text-xl font-semibold mb-2">Balance: ${balance.toFixed(2)}</p>
+          <div className="flex gap-2 mb-2">
+            <Input
+              placeholder="Description"
+              value={desc}
+              onChange={(e) => setDesc(e.target.value)}
+            />
+            <Input
+              type="number"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={type === "income" ? "default" : "outline"}
+              onClick={() => setType("income")}
+            >
+              Income
+            </Button>
+            <Button
+              variant={type === "expense" ? "default" : "outline"}
+              onClick={() => setType("expense")}
+            >
+              Expense
+            </Button>
+          </div>
+          <Button className="w-full" onClick={addTransaction}>
+            Add Transaction
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="w-full max-w-md shadow-lg">
+        <CardContent className="p-4">
+          <h2 className="text-lg font-semibold mb-3">Transactions</h2>
+          <ul className="space-y-2">
+            {transactions.map((tx) => (
+              <li
+                key={tx.id}
+                className={`flex justify-between p-2 rounded-lg shadow-sm ${
+                  tx.type === "income" ? "bg-green-100" : "bg-red-100"
+                }`}
+              >
+                <span>{tx.desc || "(No description)"}</span>
+                <span>
+                  {tx.type === "income" ? "+" : "-"}${tx.amount.toFixed(2)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
